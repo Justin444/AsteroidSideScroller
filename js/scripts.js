@@ -8,6 +8,16 @@ var asterPos = 0;
 var laspos = 0;
 var start = false;
 
+//resize canvas to fullscreen
+window.addEventListener('resize', resizeCanvas, false);
+
+function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+			main();
+    }
+    resizeCanvas();
+
 //fps
 var fps = 60;
 var interval = 1000/fps; // milliseconds
@@ -19,9 +29,6 @@ var right = false;
 var up = false;
 var down = false;
 var fire = false;
-
-//calls main
-main();
 
 function main()
 {
@@ -67,7 +74,7 @@ function main()
 	
 	//speed should be changed
 	if(left)
-		player.Xpos -= step * 300;
+		player.Xpos -= 10;
 	if(up)
 		player.Ypos -= 10;
 	if(right)
