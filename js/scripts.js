@@ -34,6 +34,7 @@ var fire = false;
 
 function main()
 {
+	ctx.globalAlpha=1;//*
 	if  (start == false)
 	{
 	 startScreen();
@@ -73,6 +74,32 @@ function main()
 			player.Ypos = 0;
 		}
 	}
+		
+		//laser-asteroid collision check
+	for(var i = 0; i < asterPos; i++)
+	{
+		for(var j = 0; j < laspos; j++)
+		{
+			if(lasers[j].Xpos < asteroid[i].Xpos + asteroid[i].width &&
+			lasers[j].Xpos + lasers[j].width > asteroid[i].Xpos&&
+			lasers[j].Ypos < asteroid[i].Ypos + asteroid[i].height &&
+			lasers[j].height+ lasers[j].Ypos > asteroid[i].Ypos)
+			{
+				
+				
+				explosion = new createObject("explosion.png", asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);//*
+								
+				//set asteroid[i] position to undefined;	
+				asteroid[i].Xpos = undefined;
+				asteroid[i].Ypos = undefined;
+				//set lasers[j] position to undefined;	
+				lasers[j].Xpos = undefined;
+				lasers[j].Ypos = undefined;
+				
+				//award points
+			}
+		}
+	}
 	
 	//speed should be changed
 	if(left)
@@ -99,6 +126,23 @@ function main()
 	//			  player object starting x and y coord size of ship 
 	ctx.drawImage(player.Sprite,player.Xpos,player.Ypos, 50, 50);
 	}
+	
+	//draw current explosion
+	ctx.globalAlpha=ga;
+	if (ga > 0)//fades out the explosion
+	{
+		ga = ga-0.1;
+	}
+	if (ga<=0)
+	{
+		ga=1;
+		explosion.Xpos=undefined;
+		explosion.Ypos=undefined;
+		
+	}
+	
+	ctx.drawImage(explosion.Sprite, explosion.Xpos, explosion.Ypos, 50, 50);
+	ctx.globalAlpha=1;
 
 }
 //time to update frames
@@ -174,27 +218,28 @@ function createLaser()
 		}
 	}, false);
 
+var hue = 255; // the red component of rgb
+var direction = 1;// are we moving toward red or black? 
 	
 function startScreen()
 {
-	 // the red component of rgb
-	 var hue = 255; 
-	 // create a css color from the `hue`
-	 var color = 'rgb(' + hue + ',0,0)';
-	/*make instructions flash
-    // are we moving toward red or black?
-    var direction = 1; 
-		
+	
+	//make instructions flash
 	hue += direction;
-        if (hue > 255) direction = -1;
-        if (hue < 0) direction = 1;
-	*/
+        if (hue >= 255) direction = -2;
+        if (hue <= 85) direction = 2;
+		
+	// create a css color from the `hue`
+	var color = 'rgb(' + hue + ',0,0)';
+	
 	//find the center of the canvas
 	var x = canvas.width / 2;
 	var y = canvas.height / 2;
 	
 	//clear the canvas
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	
+	ctx.drawImage(player.Sprite,250,250, 50, 50);
 	
 	//Write the game title
 	ctx.font = "50px Garamond";
