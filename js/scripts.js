@@ -7,6 +7,8 @@ var lasers = [];
 var asterPos = 0;
 var laspos = 0;
 var start = false;
+var explosion = new createObject("explosion.png", undefined, undefined, 75, 75);
+var ga=0.5;
 
 //resize canvas to fullscreen
 window.addEventListener('resize', resizeCanvas, false);
