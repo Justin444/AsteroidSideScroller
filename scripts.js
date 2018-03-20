@@ -7,6 +7,22 @@ var lasers = [];
 var asterPos = 0;
 var laspos = 0;
 var start = false;
+var score = 0;
+var old = new Date();
+var o = old.setSeconds(5);
+var explosion = new createObject("explosion.png", undefined, undefined, 75, 75);
+//fps
+var fps = 60;
+var interval = 1000/fps; // milliseconds
+var step = interval/1000 // seconds
+//controls
+var left = false;
+var right = false;
+var up = false;
+var down = false;
+var fire = false;
+var ga = 0.5;
+
 
 //resize canvas to fullscreen
 window.addEventListener('resize', resizeCanvas, false);
@@ -18,40 +34,23 @@ function resizeCanvas() {
     }
     resizeCanvas();
 
-//fps
-var fps = 60;
-var interval = 1000/fps; // milliseconds
-var step = interval/1000 // seconds
-
-//controls
-var left = false;
-var right = false;
-var up = false;
-var down = false;
-var fire = false;
-
 function main()
 {
+	ctx.globalAlpha=1;//*
 	if  (start == false)
 	{
 	 startScreen();
 	}
 	else
 	{
-	//clear the canvas
-	ctx.clearRect(0,0,canvas.width, canvas.height);
-	
-	//generating asteroids
-	var amt = Math.floor(5 + Math.random() * 15);
-	
-	if(asterPos == 0)
-	{
-		for(var x = 0; x < amt; x++)
-		{
-			createAsteroid()
-			asterPos++;
-		}
-	}
+		//clear the canvas
+		ctx.clearRect(0,0,canvas.width, canvas.height);
+		//generating asteroids
+		//if (old.getSeconds == 5)
+		//{
+			createAsteroid();
+		//}
+		
 	//side scrolling
 	for (var x = 0; x < asterPos; x++)
 	{
@@ -59,7 +58,7 @@ function main()
 		asteroid[x].Xpos += -player.Xpos / 50;
 	}
 	
-		//asteroid-player collision check
+	//collision check
 	for(var i = 0; i < asterPos; i++)
 	{
 		if(player.Xpos < asteroid[i].Xpos + asteroid[i].width &&
@@ -82,6 +81,9 @@ function main()
 			lasers[j].Ypos < asteroid[i].Ypos + asteroid[i].height &&
 			lasers[j].height+ lasers[j].Ypos > asteroid[i].Ypos)
 			{
+				
+				explosion = new createObject("explosion.png", asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);//*
+				
 				//set asteroid[i] position to undefined;	
 				asteroid[i].Xpos = undefined;
 				asteroid[i].Ypos = undefined;
@@ -118,6 +120,23 @@ function main()
 	//			  player object starting x and y coord size of ship 
 	ctx.drawImage(player.Sprite,player.Xpos,player.Ypos, 50, 50);
 	}
+	
+	//draw current explosion
+	ctx.globalAlpha=ga;
+	if (ga > 0)//fades out the explosion
+	{
+		ga = ga-0.-1;
+	}
+	if (ga<=0)
+	{
+		ga=1;
+		explosion.Xpos=undefined;
+		explosion.Ypos=undefined;
+		
+	}
+	
+	ctx.drawImage(explosion.Sprite, explosion.Xpos, explosion.Ypos, 75, 75);
+	ctx.globalAlpha=1;
 
 }
 //time to update frames
@@ -137,9 +156,14 @@ function createObject(img, x, y, w, h)
 
 function createAsteroid()
 {
-	var rndX = Math.floor(100 + Math.random() * 500);
-	var rndY = Math.floor(100 + Math.random() * 500);
-	asteroid[asterPos] = new createObject("asteroid.png", rndX, rndY, 75, 75);
+	var amt = Math.floor(5 + Math.random() * 15);
+	for (var x = 0; x < amt; x++)
+	{
+		var rndX = Math.floor(canvas.width + Math.random() * canvas.width * 2);
+		var rndY = Math.floor(275 * Math.random() * canvas.height);
+		asteroid[asterPos] = new createObject("asteroid.png", rndX, rndY, 75, 75);
+		asterPos++;
+	}
 }
 
 function createLaser()
@@ -193,7 +217,8 @@ function createLaser()
 		}
 	}, false);
 
-	var hue = 255; // the red component of rgb
+	
+var hue = 255; // the red component of rgb
 var direction = 1;// are we moving toward red or black? 
 function startScreen()
 {
@@ -206,8 +231,8 @@ function startScreen()
 	var color = 'rgb(' + hue + ',0,0)';
 	
 	//find the center of the canvas
-	var x = canvas.width / 2;
-	var y = canvas.height / 2;
+	var x =window.innerWidth / 2.65;
+	var y = window.innerHeight / 2;
 	
 	//clear the canvas
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -215,10 +240,11 @@ function startScreen()
 	//Write the game title
 	ctx.font = "50px Garamond";
 	ctx.fillStyle = 'red';
-	ctx.fillText("Asteroids Side Scroller",100,y);
+	ctx.fillText("Asteroids Side Scroller",x,y);
 	
 	//Write start instructions
 	ctx.font = "25px Garamond";
 	ctx.fillStyle = color;
-	ctx.fillText("Press Enter to begin",170,y+50);
+	ctx.fillText("Press Enter to begin",x,y+50);
 }
+	
