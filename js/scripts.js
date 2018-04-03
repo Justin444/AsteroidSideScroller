@@ -38,6 +38,78 @@ function resizeCanvas() {
     }
     resizeCanvas();
 
+	var particles = {},
+    particleIndex = 0,
+    settings = {
+      density: 15,
+      particleSize: 7,
+      gravity: 0,
+      maxLife: 100
+    };
+	
+function Particle(dx, dy) {
+  // Establish starting positions and velocities
+  this.x = dx+15;
+  this.y = dy+15;
+
+  // Random X and Y velocities
+  this.vx = Math.random() * 20 - 40;
+  this.vy = Math.random() * 20- 5;
+
+  // Add new particle to the index
+  particleIndex ++;
+  particles[particleIndex] = this;
+  this.id = particleIndex;
+  this.life = 0;
+}
+
+Particle.prototype.draw = function() {
+  this.x += this.vx;
+  this.y += this.vy;
+
+  // Adjust for gravity
+  this.vy += settings.gravity;
+
+  // Age the particle
+  this.life++;
+
+  // If Particle is old, remove it
+  if (this.life >= settings.maxLife) {
+    delete particles[this.id];
+  }
+
+  // Create the shapes
+  ctx.clearRect(settings.leftWall, settings.groundLevel, canvas.width, canvas.height);
+  ctx.beginPath();
+  ctx.fillStyle="white";
+  ctx.fillRect(this.x, this.y, settings.particleSize, settings.particleSize); 
+  ctx.closePath(); 
+  ctx.fill();
+}
+function renderParticles()
+{
+	// Draw the particles
+        for (var i = 0; i < settings.density; i++) {
+          if (Math.random() > 0.97) {
+            // Introducing a random chance of creating a particle
+            // corresponding to an chance of 1 per second,
+            // per "density" value
+            new Particle(player.Xpos, player.Ypos);
+          }
+        }
+}
+
+function preShake() {
+  ctx.save();
+  var dx = Math.random()*10;
+  var dy = Math.random()*10;
+  ctx.translate(dx, dy);  
+}
+
+function postShake() {
+  ctx.restore();
+}
+
 	
 	
 function main()
@@ -135,15 +207,28 @@ function main()
 	
 	//speed should be changed
 	if(left && player.Xpos>=0)
+	{
+		renderParticles();
 		player.Xpos -= 10;
+	}
 	if(up && player.Ypos>=0)
+	{
+		renderParticles();
 		player.Ypos -= 10;
+	}
 	if(right && player.Xpos <= (canvas.width-player.width))
+	{
+		renderParticles();
 		player.Xpos += 10;
+	}
 	if(down && player.Ypos <= (canvas.height-player.height))
+	{
+		renderParticles();
 		player.Ypos += 10;
+	}
 	if(fire)
 	{
+		postShake();
 		createLaser();
 		laspos++;
 		fire = false;
@@ -158,6 +243,9 @@ function main()
 	//			  player object starting x and y coord size of ship 
 	ctx.drawImage(player.Sprite,player.Xpos,player.Ypos, 50, 50);
 	}
+	for (var i in particles) {
+          particles[i].draw();
+        }
 	
 	//draw current explosion
 	ctx.globalAlpha=ga;
