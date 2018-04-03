@@ -6,7 +6,7 @@ var asteroid = [];
 var lasers = [];
 var asterPos = 0;
 var laspos = 0;
-var start = false;
+var start = true;
 var score = 0;
 var old = new Date();
 var o = old.setSeconds(5);
@@ -24,6 +24,9 @@ var fire = false;
 var ga = 0.5;
 var timer = 0;
 
+var end = false;
+var score = 0;
+var lives = 3;
 
 //resize canvas to fullscreen
 window.addEventListener('resize', resizeCanvas, false);
@@ -40,9 +43,13 @@ function resizeCanvas() {
 function main()
 {
 	ctx.globalAlpha=1;
-	if  (start == false)
+	if  (start == true)
 	{
 	 startScreen();
+	}
+	else if(end == true)
+	{
+		endScreen();
 	}
 	else
 	{
@@ -58,7 +65,7 @@ function main()
 	//side scrolling,changed to move at steady pace and delete asteroids offscreen 3/27/18
 	for (var x = 0; x < asterPos; x++)
 	{
-		ctx.drawImage(asteroid[x].Sprite, asteroid[x].Xpos, asteroid[x].Ypos, 75, 75);
+		ctx.drawImage(asteroid[x].Sprite, asteroid[x].Xpos, asteroid[x].Ypos, 50, 65);
 		asteroid[x].Xpos -= 2+(player.Xpos/100);
 		if (asteroid[x].Xpos < -100)
 		{
@@ -70,7 +77,17 @@ function main()
 			//ctx.clearRect(asteroid[x].Xpos, asteroid[x].Ypos, 75, 75);
 		}
 	}
+	//display score
+	ctx.font = "35px Garamond";
+	ctx.fillStyle = 'white';
+	ctx.fillText("Score: "+score,25,50);
 	
+	//draw lives
+	for(i=0;i<lives;i++)
+	{
+		var tempX=(25*i)+75;//offsets life images
+	ctx.drawImage(player.Sprite,canvas.width-tempX,40, 35, 35);
+	}
 	
 	//collision check
 	for(var i = 0; i < asterPos; i++)
@@ -82,8 +99,13 @@ function main()
 		{
 			player.Xpos = 0;
 			player.Ypos = 0;
+			lives--;
+			if (lives==0)
+				end=true;
 		}
 	}
+	
+	
 	
 	//laser-asteroid collision check
 	for(var i = 0; i < asterPos; i++)
@@ -106,6 +128,7 @@ function main()
 				lasers[j].Xpos = undefined;
 				lasers[j].Ypos = undefined;
 				//award points
+				score += 100;
 			}
 		}
 	}
@@ -192,10 +215,13 @@ function createLaser()
 	window.addEventListener("keydown", function(e){
 		switch(e.keyCode)
 		{
-			case 13:
-				start = true;
+			case 13://start
+				start = false;
+				end = false;
+				score = 0;
+				lives = 3;
 				break;
-			case 32:
+			case 32://fire
 				fire  = true;
 				break;
 			case 37: // left arrow
@@ -266,3 +292,14 @@ function startScreen()
 	ctx.fillText("Press Enter to begin",x,y+50);
 }
 	
+function endScreen()
+{
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.font = "50px Garamond";
+	ctx.fillStyle = 'red';
+	ctx.fillText("MISSION FAILED, you ran out of lives!",(canvas.width/2)-150,canvas.height/2);
+	
+	ctx.font = "25px Garamond";
+	ctx.fillStyle = 'red';
+	ctx.fillText("Press Enter to play again",(canvas.width/2)-150,(canvas.height/2)+50);	
+}
