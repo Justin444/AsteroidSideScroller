@@ -7,8 +7,23 @@ var lasers = [];
 var asterPos = 0;
 var laspos = 0;
 var start = false;
+var score = 0;
+var old = new Date();
+var o = old.setSeconds(5);
 var explosion = new createObject("explosion.png", undefined, undefined, 75, 75);
-var ga=0.5;
+//fps
+var fps = 60;
+var interval = 1000/fps; // milliseconds
+var step = interval/1000 // seconds
+//controls
+var left = false;
+var right = false;
+var up = false;
+var down = false;
+var fire = false;
+var ga = 0.5;
+var timer = 0;
+
 
 //resize canvas to fullscreen
 window.addEventListener('resize', resizeCanvas, false);
@@ -20,47 +35,42 @@ function resizeCanvas() {
     }
     resizeCanvas();
 
-//fps
-var fps = 60;
-var interval = 1000/fps; // milliseconds
-var step = interval/1000 // seconds
-
-//controls
-var left = false;
-var right = false;
-var up = false;
-var down = false;
-var fire = false;
-
+	
+	
 function main()
 {
-	ctx.globalAlpha=1;//*
+	ctx.globalAlpha=1;
 	if  (start == false)
 	{
 	 startScreen();
 	}
 	else
 	{
-	//clear the canvas
-	ctx.clearRect(0,0,canvas.width, canvas.height);
-	
-	//generating asteroids
-	var amt = Math.floor(5 + Math.random() * 15);
-	
-	if(asterPos == 0)
-	{
-		for(var x = 0; x < amt; x++)
+		//clear the canvas
+		ctx.clearRect(0,0,canvas.width, canvas.height);
+		//generating asteroids
+		if (timer>100)
 		{
-			createAsteroid()
-			asterPos++;
+			createAsteroid();
+			timer=0;
 		}
-	}
-	//side scrolling
+		
+	//side scrolling,changed to move at steady pace and delete asteroids offscreen 3/27/18
 	for (var x = 0; x < asterPos; x++)
 	{
 		ctx.drawImage(asteroid[x].Sprite, asteroid[x].Xpos, asteroid[x].Ypos, 75, 75);
-		asteroid[x].Xpos += -player.Xpos / 50;
+		asteroid[x].Xpos -= 2+(player.Xpos/100);
+		if (asteroid[x].Xpos < -100)
+		{
+			asteroid[x].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
+			//delete asteroid[x].Xpos;
+			//delete asteroid[x].Ypos;
+			//delete asteroid[x].width;
+			//delete asteroid[x].height;
+			//ctx.clearRect(asteroid[x].Xpos, asteroid[x].Ypos, 75, 75);
+		}
 	}
+	
 	
 	//collision check
 	for(var i = 0; i < asterPos; i++)
@@ -74,8 +84,8 @@ function main()
 			player.Ypos = 0;
 		}
 	}
-		
-		//laser-asteroid collision check
+	
+	//laser-asteroid collision check
 	for(var i = 0; i < asterPos; i++)
 	{
 		for(var j = 0; j < laspos; j++)
@@ -86,29 +96,28 @@ function main()
 			lasers[j].height+ lasers[j].Ypos > asteroid[i].Ypos)
 			{
 				
-				
 				explosion = new createObject("explosion.png", asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);//*
-								
+				
 				//set asteroid[i] position to undefined;	
-				asteroid[i].Xpos = undefined;
-				asteroid[i].Ypos = undefined;
+				asteroid[i].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
+				
+				
 				//set lasers[j] position to undefined;	
 				lasers[j].Xpos = undefined;
 				lasers[j].Ypos = undefined;
-				
 				//award points
 			}
 		}
 	}
 	
 	//speed should be changed
-	if(left)
+	if(left && player.Xpos>=0)
 		player.Xpos -= 10;
-	if(up)
+	if(up && player.Ypos>=0)
 		player.Ypos -= 10;
-	if(right)
+	if(right && player.Xpos <= (canvas.width-player.width))
 		player.Xpos += 10;
-	if(down)
+	if(down && player.Ypos <= (canvas.height-player.height))
 		player.Ypos += 10;
 	if(fire)
 	{
@@ -131,7 +140,7 @@ function main()
 	ctx.globalAlpha=ga;
 	if (ga > 0)//fades out the explosion
 	{
-		ga = ga-0.1;
+		ga = ga-0.01;
 	}
 	if (ga<=0)
 	{
@@ -141,9 +150,10 @@ function main()
 		
 	}
 	
-	ctx.drawImage(explosion.Sprite, explosion.Xpos, explosion.Ypos, 50, 50);
+	ctx.drawImage(explosion.Sprite, explosion.Xpos, explosion.Ypos, 75, 75);
 	ctx.globalAlpha=1;
 
+	timer++;
 }
 //time to update frames
 //needs to be changed
@@ -162,9 +172,15 @@ function createObject(img, x, y, w, h)
 
 function createAsteroid()
 {
-	var rndX = Math.floor(100 + Math.random() * 500);
-	var rndY = Math.floor(100 + Math.random() * 500);
-	asteroid[asterPos] = new createObject("asteroid.png", rndX, rndY, 75, 75);
+	//var amt = Math.floor(5 + Math.random() * 15);
+	var amt = 1;
+	for (var x = 0; x < amt; x++)
+	{
+		var rndX = Math.floor(canvas.width + Math.random() * canvas.width * 2);
+		var rndY = Math.floor(Math.random() * canvas.height);
+		asteroid[asterPos] = new createObject("asteroid.png", rndX, rndY, 75, 75);
+		asterPos++;
+	}
 }
 
 function createLaser()
@@ -218,12 +234,11 @@ function createLaser()
 		}
 	}, false);
 
+	
 var hue = 255; // the red component of rgb
 var direction = 1;// are we moving toward red or black? 
-	
 function startScreen()
 {
-	
 	//make instructions flash
 	hue += direction;
         if (hue >= 255) direction = -2;
@@ -233,21 +248,21 @@ function startScreen()
 	var color = 'rgb(' + hue + ',0,0)';
 	
 	//find the center of the canvas
-	var x = canvas.width / 2;
-	var y = canvas.height / 2;
+	var x =window.innerWidth / 2.65;
+	var y = window.innerHeight / 2;
 	
 	//clear the canvas
+	timer+=1;
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	
-	ctx.drawImage(player.Sprite,250,250, 50, 50);
 	
 	//Write the game title
 	ctx.font = "50px Garamond";
 	ctx.fillStyle = 'red';
-	ctx.fillText("Asteroids Side Scroller",100,y);
+	ctx.fillText("Asteroids Side Scroller",x,y);
 	
 	//Write start instructions
 	ctx.font = "25px Garamond";
 	ctx.fillStyle = color;
-	ctx.fillText("Press Enter to begin",170,y+50);
+	ctx.fillText("Press Enter to begin",x,y+50);
 }
+	
