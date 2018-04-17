@@ -2,6 +2,21 @@
 
 html, body { width:95vw; height:95vh; }
 
+body{
+	background-color:grey;
+}
+
+#topnav {
+    background-color: #000; /* black */
+    border: dotted grey;
+    color: white;
+    padding: 15px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 25px;
+	float: right;
+}
 
 canvas { 
   height: 90vh; 
@@ -11,4 +26,22 @@ canvas {
   margin-left:3%;
   margin-top:3%;
 
+}
+
+#prose{
+	margin:5%;
+	clear:both;
+}
+
+h1{
+	width:50%;
+	float:left;
+	text-align:center;
+	padding: 15px 32px;
+	text-decoration:underline;
+}
+
+h2{
+	width:90%;
+	text-align:center;
 }
