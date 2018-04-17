@@ -1,20 +1,31 @@
-//variables
+//create the canvas
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-var player = new createObject("ship.png", 0, 0, 50, 50);
+//pictures
+var ship1 = new Image();
+ship1.src = 'ship.png';
+var asteroid1 = new Image();
+asteroid1.src = "asteroid.png";
+var explosion1 = new Image();
+explosion1.src = "explosion.png";
+var laser = new Image();
+laser.src = "laser.png";
+//variables
+var player = new createObject(0, 0, 50, 50);
 var asteroid = [];
 var lasers = [];
 var asterPos = 0;
 var laspos = 0;
-var start = true;
+var start = false;
 var score = 0;
-var old = new Date();
-var o = old.setSeconds(5);
-var explosion = new createObject("explosion.png", undefined, undefined, 75, 75);
+var ga = 0.5;
+var explosion = new createObject(undefined, undefined, 75, 75);
+
 //fps
 var fps = 60;
 var interval = 1000/fps; // milliseconds
 var step = interval/1000 // seconds
+
 //controls
 var left = false;
 var right = false;
@@ -28,6 +39,14 @@ var end = false;
 var score = 0;
 var lives = 3;
 
+//audio
+var backgroundmusic = new Audio();
+var backgroundmusic = new Audio("D:/project/audio/backgroundmusic.mp3");
+backgroundmusic.volume = 0.5;
+backgroundmusic.play();
+var lasersound = new Audio();
+var lasersound = new Audio("D:/project/audio/laser.mp3");
+
 //resize canvas to fullscreen
 window.addEventListener('resize', resizeCanvas, false);
 
@@ -37,14 +56,14 @@ function resizeCanvas() {
 			main();
     }
     resizeCanvas();
-
-	var particles = {},
+	
+var particles = {},
     particleIndex = 0,
     settings = {
       density: 15,
-      particleSize: 7,
+      particleSize: 4,
       gravity: 0,
-      maxLife: 100
+      maxLife: 50
     };
 	
 function Particle(dx, dy) {
@@ -53,8 +72,8 @@ function Particle(dx, dy) {
   this.y = dy+15;
 
   // Random X and Y velocities
-  this.vx = Math.random() * 20 - 40;
-  this.vy = Math.random() * 20- 5;
+  this.vx = Math.random() * 20 - 30;
+  this.vy = Math.random() * 2.5 - 1;
 
   // Add new particle to the index
   particleIndex ++;
@@ -77,16 +96,24 @@ Particle.prototype.draw = function() {
   if (this.life >= settings.maxLife) {
     delete particles[this.id];
   }
+  
+  settings.particleSize = Math.random() * 15 + 2
 
   // Create the shapes
   ctx.clearRect(settings.leftWall, settings.groundLevel, canvas.width, canvas.height);
   ctx.beginPath();
-  ctx.fillStyle="white";
-  ctx.fillRect(this.x, this.y, settings.particleSize, settings.particleSize); 
+  ctx.strokeRect(this.x, this.y, settings.particleSize, settings.particleSize); 
   ctx.closePath(); 
-  ctx.fill();
+
+    var gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 150);
+    gradient.addColorStop(0, 'red');
+    gradient.addColorStop(1, 'orange');
+	ctx.lineWidth = 3;
+	ctx.lineCap = 'square'
+    ctx.strokeStyle = gradient;
+    ctx.fill();
 }
-function renderParticles()
+function renderParticles(x,y)
 {
 	// Draw the particles
         for (var i = 0; i < settings.density; i++) {
@@ -94,30 +121,18 @@ function renderParticles()
             // Introducing a random chance of creating a particle
             // corresponding to an chance of 1 per second,
             // per "density" value
-            new Particle(player.Xpos, player.Ypos);
+            new Particle(x,y);
           }
         }
 }
 
-function preShake() {
-  ctx.save();
-  var dx = Math.random()*10;
-  var dy = Math.random()*10;
-  ctx.translate(dx, dy);  
-}
 
-function postShake() {
-  ctx.restore();
-}
-
-	
-	
 function main()
 {
 	ctx.globalAlpha=1;
 	if  (start == true)
 	{
-	 startScreen();
+		startScreen();
 	}
 	else if(end == true)
 	{
@@ -127,28 +142,29 @@ function main()
 	{
 		//clear the canvas
 		ctx.clearRect(0,0,canvas.width, canvas.height);
+		
 		//generating asteroids
-		if (timer>100)
+		if ((timer%100)==0)
 		{
 			createAsteroid();
-			timer=0;
 		}
 		
 	//side scrolling,changed to move at steady pace and delete asteroids offscreen 3/27/18
 	for (var x = 0; x < asterPos; x++)
 	{
-		ctx.drawImage(asteroid[x].Sprite, asteroid[x].Xpos, asteroid[x].Ypos, 50, 65);
+		ctx.drawImage(asteroid1, asteroid[x].Xpos, asteroid[x].Ypos, 50, 65);
 		asteroid[x].Xpos -= 2+(player.Xpos/100);
 		if (asteroid[x].Xpos < -100)
 		{
 			asteroid[x].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
-			//delete asteroid[x].Xpos;
-			//delete asteroid[x].Ypos;
-			//delete asteroid[x].width;
-			//delete asteroid[x].height;
-			//ctx.clearRect(asteroid[x].Xpos, asteroid[x].Ypos, 75, 75);
+			delete asteroid[x].Xpos;
+			delete asteroid[x].Ypos;
+			delete asteroid[x].width;
+			delete asteroid[x].height;
+			ctx.clearRect(asteroid[x].Xpos, asteroid[x].Ypos, 75, 75);
 		}
 	}
+	
 	//display score
 	ctx.font = "35px Garamond";
 	ctx.fillStyle = 'white';
@@ -158,7 +174,7 @@ function main()
 	for(i=0;i<lives;i++)
 	{
 		var tempX=(25*i)+75;//offsets life images
-	ctx.drawImage(player.Sprite,canvas.width-tempX,40, 35, 35);
+		ctx.drawImage(ship1,canvas.width-tempX,40, 35, 35);
 	}
 	
 	//collision check
@@ -169,15 +185,18 @@ function main()
 		player.Ypos < asteroid[i].Ypos + asteroid[i].height &&
 		player.height+ player.Ypos > asteroid[i].Ypos)
 		{
-			player.Xpos = 0;
-			player.Ypos = 0;
+			//player.Xpos = 0;
+			//player.Ypos = 0;
 			lives--;
+			asteroid[i].Xpos = -10;
 			if (lives==0)
+			{
+				asteroid = [];
+				asterPos = 0;
 				end=true;
+			}
 		}
 	}
-	
-	
 	
 	//laser-asteroid collision check
 	for(var i = 0; i < asterPos; i++)
@@ -190,7 +209,7 @@ function main()
 			lasers[j].height+ lasers[j].Ypos > asteroid[i].Ypos)
 			{
 				
-				explosion = new createObject("explosion.png", asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);//*
+				explosion = new createObject(asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);//*
 				
 				//set asteroid[i] position to undefined;	
 				asteroid[i].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
@@ -200,52 +219,66 @@ function main()
 				lasers[j].Xpos = undefined;
 				lasers[j].Ypos = undefined;
 				//award points
-				score += 100;
+				score += 10;
 			}
 		}
 	}
 	
 	//speed should be changed
-	if(left && player.Xpos>=0)
+	if(left)
 	{
-		renderParticles();
+		renderParticles(player.Xpos, player.Ypos);
 		player.Xpos -= 10;
 	}
-	if(up && player.Ypos>=0)
+	if(up)
 	{
-		renderParticles();
+		renderParticles(player.Xpos, player.Ypos);
 		player.Ypos -= 10;
 	}
-	if(right && player.Xpos <= (canvas.width-player.width))
+	if(right)
 	{
-		renderParticles();
+		renderParticles(player.Xpos, player.Ypos);
 		player.Xpos += 10;
 	}
-	if(down && player.Ypos <= (canvas.height-player.height))
+	if(down)
 	{
-		renderParticles();
+		renderParticles(player.Xpos, player.Ypos);
 		player.Ypos += 10;
 	}
 	if(fire)
 	{
-		postShake();
-		createLaser();
-		laspos++;
-		fire = false;
+		//if(wait a second)
+		//{
+			lasersound.play();
+			renderParticles(player.Xpos, player.Ypos);
+			createLaser();
+			laspos++;
+			fire = false;
+		//}
 	}
-	for (var x = 0; x < laspos; x++)
+		for (var x = 0; x < laspos; x++)
 		{
-			ctx.drawImage(lasers[x].Sprite, lasers[x].Xpos, lasers[x].Ypos, 50, 50);
+			ctx.drawImage(laser, lasers[x].Xpos, lasers[x].Ypos, 50, 50);
+			if (isFinite(lasers[x].Xpos) && isFinite(lasers[x].Ypos))
+			{
+				renderParticles(lasers[x].Xpos,lasers[x].Ypos);
+			}
 			lasers[x].Xpos += step * 1500;
+			//delete lasers past a certain point
+			if (lasers[x].Xpos > player.Xpos + canvas.width || lasers[x].Xpos < -1)
+			{
+				delete lasers[x].Xpos;
+				delete lasers[x].Ypos;
+				delete lasers[x].width;
+				delete lasers[x].height;
+				ctx.clearRect(lasers[x].Xpos, lasers[x].Ypos, 75, 75);
+			}
 		}
 
 	
 	//			  player object starting x and y coord size of ship 
-	ctx.drawImage(player.Sprite,player.Xpos,player.Ypos, 50, 50);
+	ctx.drawImage(ship1,player.Xpos,player.Ypos, 50, 50);
 	}
-	for (var i in particles) {
-          particles[i].draw();
-        }
 	
 	//draw current explosion
 	ctx.globalAlpha=ga;
@@ -261,20 +294,21 @@ function main()
 		
 	}
 	
-	ctx.drawImage(explosion.Sprite, explosion.Xpos, explosion.Ypos, 75, 75);
+	ctx.drawImage(explosion1, explosion.Xpos, explosion.Ypos, 75, 75);
 	ctx.globalAlpha=1;
-
-	timer++;
+	
+	for (var i in particles) {
+          particles[i].draw();
+        }
+timer++;
 }
 //time to update frames
 //needs to be changed
 setInterval(main, interval);
 
 //use this for creating objects
-function createObject(img, x, y, w, h)
+function createObject(x, y, w, h)
 {
-	this.Sprite = new Image();
-	this.Sprite.src = img;
 	this.Xpos = x;
 	this.Ypos = y;
 	this.width = w;
@@ -289,14 +323,14 @@ function createAsteroid()
 	{
 		var rndX = Math.floor(canvas.width + Math.random() * canvas.width * 2);
 		var rndY = Math.floor(Math.random() * canvas.height);
-		asteroid[asterPos] = new createObject("asteroid.png", rndX, rndY, 75, 75);
+		asteroid[asterPos] = new createObject(rndX, rndY, 75, 75);
 		asterPos++;
 	}
 }
 
 function createLaser()
 {
-	lasers[laspos] = new createObject("laser.png", player.Xpos, player.Ypos, 10, 25);
+	lasers[laspos] = new createObject(player.Xpos, player.Ypos, 50, 50);
 }// end fire
 
 	//controls
@@ -308,6 +342,7 @@ function createLaser()
 				end = false;
 				score = 0;
 				lives = 3;
+				timer = 0;
 				break;
 			case 32://fire
 				fire  = true;
@@ -391,3 +426,4 @@ function endScreen()
 	ctx.fillStyle = 'red';
 	ctx.fillText("Press Enter to play again",(canvas.width/2)-150,(canvas.height/2)+50);	
 }
+	
