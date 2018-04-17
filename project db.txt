@@ -1,0 +1,12 @@
+Drop Table SCORE_T;
+
+
+Create Table SCORE_T 
+(score_name			VARCHAR(25),
+score_points			NUMERIC,
+score_time			TIMESTAMP,
+CONSTRAINT score_PK PRIMARY KEY(score_name)
+);
+
+
+Describe SCORE_T;
