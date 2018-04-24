@@ -160,7 +160,7 @@ function main()
 	for (var x = 0; x < asterPos; x++)
 	{
 		ctx.drawImage(asteroid1, asteroid[x].Xpos, asteroid[x].Ypos, 50, 65);
-		asteroid[x].Xpos -= 7+(player.Xpos/100);
+		asteroid[x].Xpos -= 10+(player.Xpos/100);
 		if (asteroid[x].Xpos < -100)
 		{
 			asteroid[x].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
@@ -192,8 +192,7 @@ function main()
 		player.Ypos < asteroid[i].Ypos + asteroid[i].height &&
 		player.height+ player.Ypos > asteroid[i].Ypos)
 		{
-			//player.Xpos = 0;
-			//player.Ypos = 0;
+			
 			explosionSoundShip.play();
 			lives--;
 			asteroid[i].Xpos = -100;
@@ -218,11 +217,11 @@ function main()
 			{
 				explosionSoundAsteroid.play();
 				explosion = new createObject(asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);//*
-				
-				//set asteroid[i] position to undefined;	
+				//alert("asteroid "+ j +" was destroyed");
+				//move the destroyed asteroid off the screen to be used again
 				asteroid[i].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
 				
-				//set lasers[j] position to undefined;	
+				//set lasers[j] position to undefined	
 				lasers[j].Xpos = undefined;
 				lasers[j].Ypos = undefined;
 				//award points
@@ -254,14 +253,13 @@ function main()
 	}
 	if(fire)
 	{
-		//if(wait a second)
-		//{
+			
 			lasersound.play();
 			renderParticles(player.Xpos, player.Ypos);
 			createLaser();
 			laspos++;
 			fire = false;
-		//}
+		
 	}
 		for (var x = 0; x < laspos; x++)
 		{
@@ -432,7 +430,11 @@ function endScreen()
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	ctx.font = "50px Garamond";
 	ctx.fillStyle = 'red';
-	ctx.fillText("MISSION FAILED, you ran out of lives!",(canvas.width/2)-150,canvas.height/2);
+	ctx.fillText("Final Score:"+score,(canvas.width/2)-150,canvas.height/2-100);
+	
+	ctx.font = "50px Garamond";
+	ctx.fillStyle = 'red';
+	ctx.fillText("MISSION FAILED, you ran out of lives!",(canvas.width/2)-350,canvas.height/2);
 	
 	ctx.font = "25px Garamond";
 	ctx.fillStyle = 'red';
