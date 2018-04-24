@@ -3,13 +3,13 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 //pictures
 var ship1 = new Image();
-ship1.src = 'ship.png';
+ship1.src = ("./images/ship.png");
 var asteroid1 = new Image();
-asteroid1.src = "asteroid.png";
+asteroid1.src = ("./images/asteroid.png");
 var explosion1 = new Image();
-explosion1.src = "explosion.png";
+explosion1.src = ("./images/explosion.png");
 var laser = new Image();
-laser.src = "laser.png";
+laser.src = ("./images/laser.png");
 //variables
 var player = new createObject(0, 0, 50, 50);
 var asteroid = [];
@@ -20,7 +20,7 @@ var start = false;
 var score = 0;
 var ga = 0.5;
 var explosion = new createObject(undefined, undefined, 75, 75);
-
+var fired = false;
 //fps
 var fps = 60;
 var interval = 1000/fps; // milliseconds
@@ -41,11 +41,18 @@ var lives = 3;
 
 //audio
 var backgroundmusic = new Audio();
-var backgroundmusic = new Audio("D:/project/audio/backgroundmusic.mp3");
-backgroundmusic.volume = 0.5;
+var backgroundmusic = new Audio("./audio/backgroundmusic.mp3");
+backgroundmusic.volume = 0.05;
 backgroundmusic.play();
 var lasersound = new Audio();
-var lasersound = new Audio("D:/project/audio/laser.mp3");
+var lasersound = new Audio("./audio/laser.mp3");  
+lasersound.volume = 0.05;
+var explosionSoundShip = new Audio();
+var explosionSoundShip = new Audio("./audio/ship_explosion.mp3");  
+explosionSoundShip.volume = 0.05;
+var explosionSoundAsteroid = new Audio();
+var explosionSoundAsteroid = new Audio("./audio/asteroid_explosion.mp3");  
+explosionSoundAsteroid.volume = 0.05;
 
 //resize canvas to fullscreen
 window.addEventListener('resize', resizeCanvas, false);
@@ -130,7 +137,7 @@ function renderParticles(x,y)
 function main()
 {
 	ctx.globalAlpha=1;
-	if  (start == true)
+	if  (start == false)
 	{
 		startScreen();
 	}
@@ -187,8 +194,9 @@ function main()
 		{
 			//player.Xpos = 0;
 			//player.Ypos = 0;
+			explosionSoundShip.play();
 			lives--;
-			asteroid[i].Xpos = -10;
+			asteroid[i].Xpos = -100;
 			if (lives==0)
 			{
 				asteroid = [];
@@ -208,12 +216,11 @@ function main()
 			lasers[j].Ypos < asteroid[i].Ypos + asteroid[i].height &&
 			lasers[j].height+ lasers[j].Ypos > asteroid[i].Ypos)
 			{
-				
+				explosionSoundAsteroid.play();
 				explosion = new createObject(asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);//*
 				
 				//set asteroid[i] position to undefined;	
 				asteroid[i].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
-				
 				
 				//set lasers[j] position to undefined;	
 				lasers[j].Xpos = undefined;
@@ -228,22 +235,22 @@ function main()
 	if(left)
 	{
 		renderParticles(player.Xpos, player.Ypos);
-		player.Xpos -= 10;
+		player.Xpos -= step * 500;
 	}
 	if(up)
 	{
 		renderParticles(player.Xpos, player.Ypos);
-		player.Ypos -= 10;
+		player.Ypos -= step * 500;
 	}
 	if(right)
 	{
 		renderParticles(player.Xpos, player.Ypos);
-		player.Xpos += 10;
+		player.Xpos += step * 500;
 	}
 	if(down)
 	{
 		renderParticles(player.Xpos, player.Ypos);
-		player.Ypos += 10;
+		player.Ypos += step * 500;
 	}
 	if(fire)
 	{
@@ -338,14 +345,18 @@ function createLaser()
 		switch(e.keyCode)
 		{
 			case 13://start
-				start = false;
+				start = true;
 				end = false;
 				score = 0;
 				lives = 3;
 				timer = 0;
 				break;
 			case 32://fire
-				fire  = true;
+			if (!fired)
+			{
+				fire = true;
+				fired = true;
+			}
 				break;
 			case 37: // left arrow
 				left = true;
@@ -367,6 +378,7 @@ function createLaser()
 		{
 			case 32: //space
 				fire  = false;
+				fired = false;
 				break;
 			case 37: // left arrow
 				left = false;
