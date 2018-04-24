@@ -42,17 +42,17 @@ var lives = 3;
 //audio
 var backgroundmusic = new Audio();
 var backgroundmusic = new Audio("./audio/backgroundmusic.mp3");
-backgroundmusic.volume = 0.05;
+backgroundmusic.volume = 0.1;
 backgroundmusic.play();
 var lasersound = new Audio();
 var lasersound = new Audio("./audio/laser.mp3");  
-lasersound.volume = 0.05;
+lasersound.volume = 0.04;
 var explosionSoundShip = new Audio();
 var explosionSoundShip = new Audio("./audio/ship_explosion.mp3");  
-explosionSoundShip.volume = 0.05;
+explosionSoundShip.volume = 0.2;
 var explosionSoundAsteroid = new Audio();
 var explosionSoundAsteroid = new Audio("./audio/asteroid_explosion.mp3");  
-explosionSoundAsteroid.volume = 0.05;
+explosionSoundAsteroid.volume = 0.15;
 
 //resize canvas to fullscreen
 window.addEventListener('resize', resizeCanvas, false);
@@ -160,7 +160,7 @@ function main()
 	for (var x = 0; x < asterPos; x++)
 	{
 		ctx.drawImage(asteroid1, asteroid[x].Xpos, asteroid[x].Ypos, 50, 65);
-		asteroid[x].Xpos -= 2+(player.Xpos/100);
+		asteroid[x].Xpos -= 7+(player.Xpos/100);
 		if (asteroid[x].Xpos < -100)
 		{
 			asteroid[x].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
@@ -232,22 +232,22 @@ function main()
 	}
 	
 	//speed should be changed
-	if(left)
+	if(left && player.Xpos>=0)
 	{
 		renderParticles(player.Xpos, player.Ypos);
 		player.Xpos -= step * 500;
 	}
-	if(up)
+	if(up && player.Ypos>=0)
 	{
 		renderParticles(player.Xpos, player.Ypos);
 		player.Ypos -= step * 500;
 	}
-	if(right)
+	if(right && player.Xpos <= (canvas.width-player.width))
 	{
 		renderParticles(player.Xpos, player.Ypos);
 		player.Xpos += step * 500;
 	}
-	if(down)
+	if(down && player.Ypos <= (canvas.height-player.height))
 	{
 		renderParticles(player.Xpos, player.Ypos);
 		player.Ypos += step * 500;
