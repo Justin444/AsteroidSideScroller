@@ -6,7 +6,7 @@
 if(isset($_POST['submit']))
 {
 $link = mysql_connect("sftweb01", "drouin", "shayne");
-mysql_select_db("drouin" );
+mysql_select_db("drouin" )or Die('Could not select database');;
 
 $query = "SELECT * FROM SCORE_T";
 mysql_query($db, $query) or die('Error querying database.');
