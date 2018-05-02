@@ -1,6 +1,6 @@
 <html>
 <body>
-<form action = "lab15.php" method = "POST">
+<form action = "database.php" method = "POST">
 </form>
 <?php
 if(isset($_POST['submit']))
