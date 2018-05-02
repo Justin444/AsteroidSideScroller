@@ -192,7 +192,8 @@ function main()
 		player.Ypos < asteroid[i].Ypos + asteroid[i].height &&
 		player.height+ player.Ypos > asteroid[i].Ypos)
 		{
-			
+			//player.Xpos = 0;
+			//player.Ypos = 0;
 			explosionSoundShip.play();
 			lives--;
 			asteroid[i].Xpos = -100;
@@ -215,13 +216,18 @@ function main()
 			lasers[j].Ypos < asteroid[i].Ypos + asteroid[i].height &&
 			lasers[j].height+ lasers[j].Ypos > asteroid[i].Ypos)
 			{
+				ga=1;
+				explosionSoundAsteroid.load();
 				explosionSoundAsteroid.play();
-				explosion = new createObject(asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);//*
+				explosion = new createObject(asteroid[i].Xpos, asteroid[i].Ypos, 75, 75);
+				
 				//alert("asteroid "+ j +" was destroyed");
 				//move the destroyed asteroid off the screen to be used again
+				
+				//set asteroid[i] position to undefined;	
 				asteroid[i].Xpos=Math.floor(canvas.width + Math.random() * canvas.width * 2);
 				
-				//set lasers[j] position to undefined	
+				//set lasers[j] position to undefined;	
 				lasers[j].Xpos = undefined;
 				lasers[j].Ypos = undefined;
 				//award points
@@ -229,6 +235,7 @@ function main()
 			}
 		}
 	}
+	//explosionSoundAsteroid.pause();
 	
 	//speed should be changed
 	if(left && player.Xpos>=0)
@@ -253,13 +260,12 @@ function main()
 	}
 	if(fire)
 	{
-			
+			lasersound.load();
 			lasersound.play();
 			renderParticles(player.Xpos, player.Ypos);
 			createLaser();
 			laspos++;
 			fire = false;
-		
 	}
 		for (var x = 0; x < laspos; x++)
 		{
@@ -431,6 +437,11 @@ function endScreen()
 	ctx.font = "50px Garamond";
 	ctx.fillStyle = 'red';
 	ctx.fillText("Final Score:"+score,(canvas.width/2)-150,canvas.height/2-100);
+	//type name 
+	
+	//upload to database
+	//xhttp.open("POST", "saveScore.php", true);
+	//xhttp.send();
 	
 	ctx.font = "50px Garamond";
 	ctx.fillStyle = 'red';
